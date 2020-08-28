@@ -363,7 +363,6 @@ static void freeCompletions(linenoiseCompletions *lc) {
  * structure as described in the structure definition. */
 static int completeLine(struct linenoiseState *ls) {
     linenoiseCompletions lc = { 0, NULL };
-    int nread, nwritten;
     char c = 0;
 
     completionCallback(ls->buf,&lc);
@@ -387,7 +386,7 @@ static int completeLine(struct linenoiseState *ls) {
                 refreshLine(ls);
             }
 
-            nread = read(ls->ifd,&c,1);
+            int nread = read(ls->ifd,&c,1);
             if (nread <= 0) {
                 freeCompletions(&lc);
                 return -1;
@@ -406,7 +405,7 @@ static int completeLine(struct linenoiseState *ls) {
                 default:
                     /* Update buffer and return */
                     if (i < lc.len) {
-                        nwritten = snprintf(ls->buf,ls->buflen,"%s",lc.cvec[i]);
+                        int nwritten = snprintf(ls->buf,ls->buflen,"%s",lc.cvec[i]);
                         ls->len = ls->pos = nwritten;
                     }
                     stop = 1;
@@ -432,6 +431,7 @@ void linenoiseSetHintsCallback(linenoiseHintsCallback *fn) {
 
 /* Register a function to free the hints returned by the hints callback
  * registered with linenoiseSetHintsCallback(). */
+// cppcheck-suppress unusedFunction
 void linenoiseSetFreeHintsCallback(linenoiseFreeHintsCallback *fn) {
     freeHintsCallback = fn;
 }
@@ -488,7 +488,6 @@ static void abFree(struct abuf *ab) {
 /* Helper of refreshSingleLine() and refreshMultiLine() to show hints
  * to the right of the prompt. */
 void refreshShowHints(struct abuf *ab, struct linenoiseState *l, int plen) {
-    char seq[64];
     if (hintsCallback && plen+l->len < l->cols) {
         int color = -1, bold = 0;
         char *hint = hintsCallback(l->buf,&color,&bold);
@@ -497,6 +496,7 @@ void refreshShowHints(struct abuf *ab, struct linenoiseState *l, int plen) {
             int hintmaxlen = l->cols-(plen+l->len);
             if (hintlen > hintmaxlen) hintlen = hintmaxlen;
             if (bold == 1 && color == -1) color = 37;
+            char seq[64];
             if (color != -1 || bold != 0)
                 snprintf(seq,64,"\033[%d;%d;49m",bold,color);
             else
